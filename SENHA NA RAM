@@ -1,0 +1,47 @@
+#include <Keypad.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+const byte ROWS = 4; // número de linhas do teclado
+const byte COLS = 4; // número de colunas do teclado
+
+char keys[ROWS][COLS] = {
+  {'1', '2', '3', 'A'},
+  {'4', '5', '6', 'B'},
+  {'7', '8', '9', 'C'},
+  {'*', '0', '#', 'D'}
+};
+
+byte rowPins[ROWS] = {9, 8, 7, 6};    // pinos conectados às linhas do teclado
+byte colPins[COLS] = {5, 4, 3, 2};    // pinos conectados às colunas do teclado
+
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+String senha; // variável para armazenar a senha temporariamente
+
+LiquidCrystal_I2C lcd(0x27, 16, 2); // Endereço I2C do LCD e número de colunas/linhas
+
+void setup() {
+  Serial.begin(9600);
+  lcd.begin(16, 2); // Inicializa o LCD
+  lcd.print("Digite a senha:"); // Exibe a mensagem inicial no LCD
+}
+
+void loop() {
+  char key = keypad.getKey();
+  
+  if (key) {
+    if (key == '#') {
+      // Se a tecla '#' for pressionada, a senha é salva e impressa no monitor serial e no LCD
+      Serial.println("Senha digitada: " + senha);
+      lcd.clear(); // Limpa o LCD
+      lcd.print("Senha: " + senha); // Exibe a senha no LCD
+      senha = ""; // Limpa a senha para uso futuro
+      delay(2000); // Aguarda 2 segundos para limpar o LCD e exibir a mensagem inicial novamente
+      lcd.clear();
+      lcd.print("Digite a senha:");
+    } else {
+      senha += key; // Concatena o caractere da tecla pressionada à senha
+    }
+  }
+}
